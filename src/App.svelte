@@ -44,11 +44,23 @@
 			<h1 class="font-bold text-destructive">Not Ready for Scan</h1>
 		{/if}
 	</div>
-	<div class="grid gap-y-2 p-6">
-		<input placeholder="Membership ID" bind:this={idInput} />
+	<div class="grid gap-10 p-10 grid-cols-2 w-screen">
+		<div class="space-y-3 w-full">
+			<input class="w-full text-center" placeholder="Membership ID" bind:this={idInput} />
+			<hr />
+			<div class="grid grid-cols-2 gap-3">
+				<input class="w-full" placeholder="First Name" />
+				<input class="w-full" placeholder="Last Name" />
+			</div>
+			<input class="w-full" placeholder="Email" />
+			<input class="w-full" placeholder="Phone" />
+			<hr />
+			<input class="w-full" placeholder="Address" />
+		</div>
 
-		<input placeholder="First Name" />
-		<input placeholder="Last Name" />
+		<div class="space-y-3 w-full">
+			<div class="bg-black opacity-15 w-[250px] h-[350px]"></div>
+		</div>
 	</div>
 </main>
 <div class="absolute bottom-0 w-screen flex flex-row justify-end bg-white border-t-2 p-4 space-x-4">
