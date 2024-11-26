@@ -8,4 +8,9 @@ export default defineConfig({
     outDir: 'electron/build'
   },
   plugins: [svelte()],
+  resolve: {
+    alias: {
+      '$lib': './src/lib'
+    }
+  }
 })
