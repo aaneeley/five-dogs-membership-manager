@@ -3,6 +3,11 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { onMount } from 'svelte';
 	import './app.css';
+	import * as Select from '$lib/components/ui/select/index.js';
+	import Label from '$lib/components/ui/label/label.svelte';
+	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
+	import PresetDatePicker from '$lib/components/PresetDatePicker.svelte';
+	import { writable } from 'svelte/store';
 
 	let idInput;
 
@@ -26,13 +31,24 @@
 	});
 
 	let autoScanReady = document.activeElement == idInput;
+	let membership_type;
+	let membership_color = '';
+	const update_membership_color = (v) => {
+		console.log(v);
+		if (!v) return;
+		if (v.value === 'conditional') {
+			membership_color = 'border-4 border-green-400 ';
+		} else {
+			membership_color = 'border-4 border-purple-400 ';
+		}
+	};
 	setInterval(() => {
 		autoScanReady = document.activeElement == idInput && idInput.value.length === 0;
 	}, 100);
 </script>
 
 <head></head>
-<main class="w-screen h-screen flex flex-col justify-start">
+<main class="w-screen h-screen flex flex-col justify-start items-center">
 	<div class="w-screen flex justify-start items-center border-b-2 space-x-4 p-4">
 		<Button on:click={clearView}>
 			Clear View <span class="opacity-50 ml-3 text-[9px]">ESC</span>
@@ -44,22 +60,102 @@
 			<h1 class="font-bold text-destructive">Not Ready for Scan</h1>
 		{/if}
 	</div>
-	<div class="grid gap-10 p-10 grid-cols-2 w-screen">
-		<div class="space-y-3 w-full">
+	<div class="grid gap-20 p-10 grid-cols-2 w-screen max-w-[70rem]">
+		<div class="w-full">
 			<input class="w-full text-center" placeholder="Membership ID" bind:this={idInput} />
-			<hr />
+			<hr class="my-5" />
 			<div class="grid grid-cols-2 gap-3">
-				<input class="w-full" placeholder="First Name" />
-				<input class="w-full" placeholder="Last Name" />
+				<div>
+					<Label for="first-name">First</Label>
+					<Input class="w-full" placeholder="First Name" id="first-name" />
+				</div>
+				<div>
+					<Label for="last-name">Last</Label>
+					<Input class="w-full" placeholder="Last Name" id="last-name" />
+				</div>
 			</div>
-			<input class="w-full" placeholder="Email" />
-			<input class="w-full" placeholder="Phone" />
-			<hr />
-			<input class="w-full" placeholder="Address" />
+			<Label for="email">Email</Label>
+			<Input class="w-full" placeholder="Email" id="email" />
+			<Label for="phone">Phone</Label>
+			<Input class="w-full" placeholder="Phone" id="phone" />
+			<hr class="my-5" />
+			<Label for="address">Address</Label>
+			<Input class="w-full" placeholder="Street Address" id="address" />
+			<Label for="city">City</Label>
+			<Input class="w-full" placeholder="City" id="city" />
+			<div class="grid grid-cols-2 gap-3">
+				<div>
+					<Label for="state">State</Label>
+					<Select.Root class="w-full" id="state">
+						<Select.Trigger>
+							<Select.Value placeholder="State" />
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="az">Arizona</Select.Item>
+							<Select.Item value="ca">California</Select.Item>
+							<Select.Item value="tx">Texas</Select.Item>
+						</Select.Content>
+					</Select.Root>
+				</div>
+				<div>
+					<Label for="zip">Zip</Label>
+					<Input class="w-full" placeholder="Zip" id="zip" />
+				</div>
+			</div>
 		</div>
 
-		<div class="space-y-3 w-full">
-			<div class="bg-black opacity-15 w-[250px] h-[350px]"></div>
+		<div class="space-y-3 w-full flex flex-col items-center">
+			<div
+				class="border-solid border-2 w-[180px] h-[225px] bg-opacity-0 relative overflow-hidden"
+			>
+				<img class="absolute bottom-0" src="/picture-placeholder.png" alt="" />
+			</div>
+			<div class="grid grid-cols-2 gap-3 w-full">
+				<div>
+					<Label for="membership-type">Membership Type</Label>
+					<Select.Root
+						class="w-full"
+						id="membership-type"
+						onSelectedChange={update_membership_color}
+						bind:selected={membership_type}
+					>
+						<Select.Trigger class="">
+							{#if membership_type?.value === 'conditional'}
+								<span class="ml-2 bg-green-300 py-1 px-2 rounded-lg">
+									Conditional
+								</span>
+							{:else if membership_type?.value === 'general'}
+								<span class="ml-2 bg-purple-400 py-1 px-2 rounded-lg">General</span>
+							{:else}
+								<span class="opacity-50">Membership Type</span>
+							{/if}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="conditional">
+								<span class="bg-green-300 py-1 px-2 rounded-lg">Conditional</span>
+							</Select.Item>
+							<Select.Item value="general">
+								<span class="bg-purple-400 py-1 px-2 rounded-lg">General</span>
+							</Select.Item>
+						</Select.Content>
+					</Select.Root>
+				</div>
+				<div>
+					<Label for="expiration-date">Expiration Date</Label>
+					<PresetDatePicker id="expiration-date" />
+				</div>
+			</div>
+			<div class="grid grid-cols-2 gap-3 w-full">
+				<div>
+					<Label for="created-date">Created Date</Label>
+					<Input class="w-full" placeholder="Created Date" id="created-date" />
+				</div>
+				<div></div>
+			</div>
+			<div class="w-full">
+				<Label for="notes">Notes</Label>
+				<Textarea class="w-full resize-none h-20" placeholder="Notes" id="notes" />
+			</div>
 		</div>
 	</div>
 </main>
