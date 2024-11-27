@@ -19,6 +19,8 @@
 
 	let value: DateValue | undefined = undefined;
 
+	export let disabled: boolean;
+
 	$: flagged = value && value < today(getLocalTimeZone());
 
 	// Check if value is a year from today
@@ -32,6 +34,7 @@
 <Popover.Root openFocus>
 	<Popover.Trigger asChild let:builder>
 		<Button
+			{disabled}
 			variant="outline"
 			class={cn(
 				'w-full justify-start text-left font-normal',
@@ -44,7 +47,7 @@
 			{value ? df.format(value.toDate(getLocalTimeZone())) : 'Pick a date'}
 		</Button>
 	</Popover.Trigger>
-	<Popover.Content class="flex w-auto flex-col space-y-2 p-2">
+	<Popover.Content class="flex w-auto flex-col space-y-2 p-2" side="right">
 		<div>
 			<Label for="date" class="mr-3">Jump To:</Label>
 			<Button
