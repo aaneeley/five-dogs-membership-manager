@@ -50,12 +50,30 @@
 			<Button
 				on:click={(v) => {
 					if (!v) return;
+					value = today(getLocalTimeZone()).add({ days: 0 });
+				}}
+				class="h-6 px-2"
+				id="date"
+				disabled={value &&
+					value.year === today(getLocalTimeZone()).year &&
+					value.month === today(getLocalTimeZone()).month &&
+					value.day === today(getLocalTimeZone()).day}
+			>
+				Now
+			</Button>
+			<Button
+				on:click={(v) => {
+					if (!v) return;
 					value = today(getLocalTimeZone()).add({ days: 365 });
 				}}
+				class="h-6 px-2"
 				id="date"
-				disabled={outlined}
+				disabled={value &&
+					value.year === today(getLocalTimeZone()).year + 1 &&
+					value.month === today(getLocalTimeZone()).month &&
+					value.day === today(getLocalTimeZone()).day}
 			>
-				Year from Today
+				Year from Now
 			</Button>
 		</div>
 		<div class="rounded-md border">
