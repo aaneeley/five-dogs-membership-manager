@@ -24,16 +24,32 @@
 		if (event.key === 'Escape') {
 			clearView();
 		}
+		if (event.key === 'Enter' && currentState === FormState.Idle) {
+			searchMember(true);
+		}
 	};
 
-	function searchMember() {
-		window.electron.ipcRenderer
-			.invoke('search-member', idInputValue)
-			.then((r) => console.log(r));
+	function searchMember(checkIn = false) {
+		window.electron.ipcRenderer.invoke('search-member', idInputValue).then((members) => {
+			if (members.length === 1) {
+				console.log(members[0]);
+				currentState = checkIn ? FormState.CheckedIn : FormState.Found;
+				first_name = members[0].first_name;
+				last_name = members[0].last_name;
+			} else if (members.length === 0) {
+				console.log('no members with that ID');
+			} else {
+				console.log('too many members with that ID');
+			}
+		});
+
+		// Fill in all the form stuff
 	}
 
 	function clearView() {
 		//TODO: Make this clear out fields and stuff
+		first_name = '';
+		last_name = '';
 		idInputValue = '';
 		currentState = FormState.Idle;
 		setTimeout(() => idInputInstance.focus(), 50);
@@ -70,9 +86,13 @@
 	let currentState = FormState.Idle;
 
 	$: autoScanReady =
-		(idInputFocused && currentState === FormState.Idle) ||
+		(idInputFocused &&
+			currentState === FormState.Idle &&
+			(!idInputValue || idInputValue.length === 0)) ||
 		(magstripeInputFocused && currentState === FormState.Create);
 	let membership_type;
+	let first_name;
+	let last_name;
 	let membership_color = '';
 	const update_membership_color = (v) => {
 		console.log(v);
@@ -131,11 +151,21 @@
 			<div class="grid grid-cols-2 gap-3">
 				<div>
 					<Label for="first-name">First</Label>
-					<Input class="w-full" placeholder="First Name" id="first-name" />
+					<Input
+						class="w-full"
+						placeholder="First Name"
+						id="first-name"
+						bind:value={first_name}
+					/>
 				</div>
 				<div>
 					<Label for="last-name">Last</Label>
-					<Input class="w-full" placeholder="Last Name" id="last-name" />
+					<Input
+						class="w-full"
+						placeholder="Last Name"
+						id="last-name"
+						bind:value={last_name}
+					/>
 				</div>
 			</div>
 			<Label for="email">Email</Label>
@@ -239,7 +269,7 @@
 						class="w-full"
 						placeholder="Created Date"
 						id="created-date"
-						disabled={currentState === FormState.Idle}
+						disabled={true}
 					/>
 				</div>
 				<div></div>
@@ -258,8 +288,20 @@
 	</div>
 </main>
 <div class="absolute bottom-0 w-screen flex flex-row justify-end bg-white border-t-2 p-4 space-x-4">
-	<Button variant="outline" on:click={searchMember}>Search</Button>
-	<Button>
-		Quick Check-In <span class="opacity-50 ml-3">⏎</span>
-	</Button>
+	{#if currentState === FormState.Idle}
+		<Button variant="outline" on:click={() => searchMember()}>Search</Button>
+	{/if}
+	{#if currentState === FormState.Idle || currentState === FormState.Found}
+		<Button
+			disabled={idInputValue?.length == 0 || !idInputValue}
+			on:click={() => searchMember(true)}
+		>
+			Check-In <span class="opacity-50 ml-3">⏎</span>
+		</Button>
+	{/if}
+	{#if currentState === FormState.Create}
+		<Button on:click={() => {}}>
+			Create <span class="opacity-50 ml-3">⏎</span>
+		</Button>
+	{/if}
 </div>
