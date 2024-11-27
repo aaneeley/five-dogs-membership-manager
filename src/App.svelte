@@ -26,6 +26,12 @@
 		}
 	};
 
+	function searchMember() {
+		window.electron.ipcRenderer
+			.invoke('search-member', idInputValue)
+			.then((r) => console.log(r));
+	}
+
 	function clearView() {
 		//TODO: Make this clear out fields and stuff
 		idInputValue = '';
@@ -164,7 +170,7 @@
 			<div class="grid grid-cols-2 gap-3">
 				<div>
 					<Label for="state">State</Label>
-					<Select.Root class="w-full" id="state">
+					<Select.Root>
 						<Select.Trigger disabled={currentState === FormState.Idle}>
 							<Select.Value placeholder="State" />
 						</Select.Trigger>
@@ -252,7 +258,7 @@
 	</div>
 </main>
 <div class="absolute bottom-0 w-screen flex flex-row justify-end bg-white border-t-2 p-4 space-x-4">
-	<Button variant="outline">Search</Button>
+	<Button variant="outline" on:click={searchMember}>Search</Button>
 	<Button>
 		Quick Check-In <span class="opacity-50 ml-3">⏎</span>
 	</Button>

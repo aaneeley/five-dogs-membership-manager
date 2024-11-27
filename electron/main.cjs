@@ -1,6 +1,6 @@
 // Modules to control application life and create native browser window
 const { log } = require('console')
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 
 if (require('electron-squirrel-startup')) app.quit();
@@ -15,10 +15,34 @@ if (isDevEnvironment) {
     });
 }
 
+var sqlite3 = require('@journeyapps/sqlcipher').verbose();
+var db = new sqlite3.Database('test.db');
+db.serialize(function () {
+    // This is the default, but it is good to specify explicitly:
+    db.run("PRAGMA cipher_compatibility = 4");
+
+    // To open a database created with SQLCipher 3.x, use this:
+    // db.run("PRAGMA cipher_compatibility = 3");
+
+    db.run("PRAGMA key = 'mysecret'");
+
+    // var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
+    // for (var i = 0; i < 10; i++) {
+    //     stmt.run("Ipsum " + i);
+    // }
+    // stmt.finalize();
+
+    db.each("SELECT * FROM members", function (err, row) {
+        console.log(row);
+    });
+});
+
+
+
 let mainWindow;
 
 const createWindow = () => {
-    
+
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 1300,
@@ -42,7 +66,7 @@ const createWindow = () => {
         log('Electron running in dev mode: 🧪')
 
     } else {
-        
+
         // when not in dev mode, load the build file instead
         mainWindow.loadFile(path.join(__dirname, 'build', 'index.html'));
 
@@ -61,12 +85,28 @@ app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-// app.on('window-all-closed', () => {
-//     if (process.platform !== 'darwin') app.quit()
-// })
+app.on('quit', () => {
+    db.close();
+})
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+ipcMain.handle('search-member', async (event, membership_id) => {
+    try {
+        console.log(membership_id)
+
+        const sql = `SELECT * FROM members WHERE id = ?`
+
+        return new Promise((resolve, reject) => {
+            db.all(sql, [membership_id], (err, rows) => {
+              if (err) {
+                console.error('Error running query:', err.message);
+                reject(err.message);
+              } else {
+                resolve(rows);
+              }
+            });
+          });
+    } catch (err) {
+        console.error('Error in IPC handler:', err);
+        throw err;
+    }
+})
